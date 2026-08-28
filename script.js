@@ -1,103 +1,37 @@
-/* =========================================
-   DONUTMONEY V3 DATABASE
-========================================= */
+let items = [];
 
 
-const defaultItems = [
+/* LOAD ITEM DATABASE */
 
-    {
-        name: "Diamond Block",
-        buy: 12000,
-        sell: 18000
-    },
+async function loadDatabase() {
 
-    {
-        name: "Emerald Block",
-        buy: 15000,
-        sell: 22000
-    },
+    try {
 
-    {
-        name: "Gold Block",
-        buy: 8000,
-        sell: 12000
-    },
+        const response = await fetch("data.json");
 
-    {
-        name: "Iron Block",
-        buy: 4000,
-        sell: 6500
-    },
+        const data = await response.json();
 
-    {
-        name: "Obsidian",
-        buy: 2500,
-        sell: 4200
-    },
+        items = data.items;
 
-    {
-        name: "Kelp",
-        buy: 20,
-        sell: 35
-    },
+        renderItems();
 
-    {
-        name: "Bamboo",
-        buy: 25,
-        sell: 42
-    },
+        renderAdmin();
 
-    {
-        name: "Netherite Scrap",
-        buy: 85000,
-        sell: 115000
-    },
+        updateStats();
 
-    {
-        name: "Ancient Debris",
-        buy: 65000,
-        sell: 90000
-    },
+    } catch (error) {
 
-    {
-        name: "Ender Pearl",
-        buy: 1500,
-        sell: 2500
+        console.error(
+            "Could not load database:",
+            error
+        );
+
     }
-
-];
-
-
-
-/* =========================================
-   LOAD DATABASE
-========================================= */
-
-
-let items =
-    JSON.parse(
-        localStorage.getItem(
-            "donutMoneyItems"
-        )
-    ) || defaultItems;
-
-
-
-function saveDatabase() {
-
-    localStorage.setItem(
-        "donutMoneyItems",
-        JSON.stringify(items)
-    );
 
 }
 
 
-
-/* =========================================
-   FORMATTING
-========================================= */
-
+/* MONEY FORMAT */
 
 function money(number) {
 
@@ -112,6 +46,8 @@ function money(number) {
 }
 
 
+/* PROFIT */
+
 function profit(item) {
 
     return item.sell - item.buy;
@@ -119,10 +55,14 @@ function profit(item) {
 }
 
 
+/* ROI */
+
 function roi(item) {
 
     if (item.buy <= 0) {
+
         return 0;
+
     }
 
     return (
@@ -133,11 +73,7 @@ function roi(item) {
 }
 
 
-
-/* =========================================
-   DATABASE DISPLAY
-========================================= */
-
+/* DISPLAY ITEMS */
 
 function renderItems() {
 
@@ -146,22 +82,19 @@ function renderItems() {
             "itemTable"
         );
 
+    if (!table) return;
+
 
     const search =
-        document
-            .getElementById(
-                "searchInput"
-            )
-            .value
-            .toLowerCase();
+        document.getElementById(
+            "searchInput"
+        ).value.toLowerCase();
 
 
     const sort =
-        document
-            .getElementById(
-                "sortSelect"
-            )
-            .value;
+        document.getElementById(
+            "sortSelect"
+        ).value;
 
 
     let filtered =
@@ -173,142 +106,137 @@ function renderItems() {
         );
 
 
-    filtered.sort(
-        (a, b) => {
+    filtered.sort((a, b) => {
 
-            if (sort === "profit") {
+        if (sort === "profit") {
 
-                return (
-                    profit(b) -
-                    profit(a)
-                );
-
-            }
-
-
-            if (sort === "roi") {
-
-                return (
-                    roi(b) -
-                    roi(a)
-                );
-
-            }
-
-
-            if (sort === "buy") {
-
-                return (
-                    a.buy -
-                    b.buy
-                );
-
-            }
-
-
-            if (sort === "sell") {
-
-                return (
-                    b.sell -
-                    a.sell
-                );
-
-            }
-
-
-            if (sort === "name") {
-
-                return a.name
-                    .localeCompare(
-                        b.name
-                    );
-
-            }
+            return profit(b) - profit(a);
 
         }
-    );
+
+        if (sort === "roi") {
+
+            return roi(b) - roi(a);
+
+        }
+
+        if (sort === "buy") {
+
+            return a.buy - b.buy;
+
+        }
+
+        if (sort === "sell") {
+
+            return b.sell - a.sell;
+
+        }
+
+        if (sort === "name") {
+
+            return a.name.localeCompare(
+                b.name
+            );
+
+        }
+
+        return 0;
+
+    });
 
 
     table.innerHTML = "";
 
 
-    filtered.forEach(
-        (item, index) => {
+    filtered.forEach(item => {
 
-            const row =
-                document.createElement(
-                    "tr"
-                );
+        const row =
+            document.createElement("tr");
 
 
-            row.innerHTML = `
+        row.innerHTML = `
 
-                <td>
-                    🍩 ${item.name}
-                </td>
+            <td>
+                🍩 ${item.name}
+            </td>
 
-                <td class="price">
-                    ${money(item.buy)}
-                </td>
+            <td class="price">
+                ${money(item.buy)}
+            </td>
 
-                <td class="price">
-                    ${money(item.sell)}
-                </td>
+            <td class="price">
+                ${money(item.sell)}
+            </td>
 
-                <td class="profit-positive">
-                    +${money(profit(item))}
-                </td>
+            <td class="profit-positive">
+                +${money(profit(item))}
+            </td>
 
-                <td class="roi-value">
-                    ${roi(item).toFixed(1)}%
-                </td>
+            <td class="roi-value">
+                ${roi(item).toFixed(1)}%
+            </td>
 
-                <td>
+            <td>
 
-                    <button
-                        class="view-button"
-                        onclick="showItem(${items.indexOf(item)})"
-                    >
-                        View
-                    </button>
+                <button
+                    class="view-button"
+                    onclick="showItem(${items.indexOf(item)})"
+                >
+                    View
+                </button>
 
-                </td>
+            </td>
 
-            `;
-
-
-            table.appendChild(row);
-
-        }
-    );
+        `;
 
 
-    updateStats();
+        table.appendChild(row);
+
+    });
 
 }
 
 
-
-/* =========================================
-   STATS
-========================================= */
-
+/* STATS */
 
 function updateStats() {
 
-    document.getElementById(
-        "itemCount"
-    ).textContent =
-        items.length;
+    const count =
+        document.getElementById(
+            "itemCount"
+        );
+
+    const marketItems =
+        document.getElementById(
+            "marketItems"
+        );
+
+    const bestProfit =
+        document.getElementById(
+            "bestProfit"
+        );
 
 
-    document.getElementById(
-        "marketItems"
-    ).textContent =
-        items.length;
+    if (count) {
+
+        count.textContent =
+            items.length;
+
+    }
 
 
-    if (items.length > 0) {
+    if (marketItems) {
+
+        marketItems.textContent =
+            items.length;
+
+    }
+
+
+    if (
+        bestProfit &&
+        items.length > 0
+    ) {
 
         const best =
             Math.max(
@@ -319,54 +247,35 @@ function updateStats() {
             );
 
 
-        document.getElementById(
-            "bestProfit"
-        ).textContent =
+        bestProfit.textContent =
             money(best);
-
-    } else {
-
-        document.getElementById(
-            "bestProfit"
-        ).textContent =
-            "$0";
 
     }
 
 }
 
 
-
-/* =========================================
-   SEARCH + SORT
-========================================= */
-
+/* SEARCH */
 
 document
-    .getElementById(
-        "searchInput"
-    )
-    .addEventListener(
+    .getElementById("searchInput")
+    ?.addEventListener(
         "input",
         renderItems
     );
 
 
+/* SORT */
+
 document
-    .getElementById(
-        "sortSelect"
-    )
-    .addEventListener(
+    .getElementById("sortSelect")
+    ?.addEventListener(
         "change",
         renderItems
     );
 
 
-
-/* =========================================
-   PROFIT CALCULATOR
-========================================= */
-
+/* CALCULATOR */
 
 function calculateProfit() {
 
@@ -412,10 +321,7 @@ function calculateProfit() {
     if (cost > 0) {
 
         totalROI =
-            (
-                totalProfit /
-                cost
-            ) * 100;
+            (totalProfit / cost) * 100;
 
     }
 
@@ -439,108 +345,19 @@ function calculateProfit() {
     "buy",
     "sell",
     "amount"
-].forEach(
-    id => {
+].forEach(id => {
 
-        document
-            .getElementById(id)
-            .addEventListener(
-                "input",
-                calculateProfit
-            );
-
-    }
-);
-
-
-
-/* =========================================
-   ADD ITEM
-========================================= */
-
-
-function addItem() {
-
-    const name =
-        document
-            .getElementById(
-                "newName"
-            )
-            .value
-            .trim();
-
-
-    const buy =
-        Number(
-            document.getElementById(
-                "newBuy"
-            ).value
+    document
+        .getElementById(id)
+        ?.addEventListener(
+            "input",
+            calculateProfit
         );
 
-
-    const sell =
-        Number(
-            document.getElementById(
-                "newSell"
-            ).value
-        );
+});
 
 
-    if (
-        !name ||
-        isNaN(buy) ||
-        isNaN(sell)
-    ) {
-
-        alert(
-            "Please enter an item name, buy price and sell price."
-        );
-
-        return;
-
-    }
-
-
-    items.push({
-
-        name: name,
-
-        buy: buy,
-
-        sell: sell
-
-    });
-
-
-    saveDatabase();
-
-    renderItems();
-
-    renderAdmin();
-
-
-    document.getElementById(
-        "newName"
-    ).value = "";
-
-
-    document.getElementById(
-        "newBuy"
-    ).value = "";
-
-
-    document.getElementById(
-        "newSell"
-    ).value = "";
-
-}
-
-
-
-/* =========================================
-   ADMIN PANEL
-========================================= */
-
+/* ADMIN DISPLAY */
 
 function renderAdmin() {
 
@@ -549,175 +366,63 @@ function renderAdmin() {
             "adminList"
         );
 
+    if (!list) return;
+
 
     list.innerHTML = "";
 
 
-    items.forEach(
-        (item, index) => {
+    items.forEach((item, index) => {
 
-            const row =
-                document.createElement(
-                    "div"
-                );
+        const row =
+            document.createElement("div");
 
 
-            row.className =
-                "admin-row";
+        row.className =
+            "admin-row";
 
 
-            row.innerHTML = `
+        row.innerHTML = `
 
-                <input
-                    value="${item.name}"
-                    onchange="editItem(${index}, 'name', this.value)"
-                >
+            <input
+                value="${item.name}"
+                readonly
+            >
 
-                <input
-                    type="number"
-                    value="${item.buy}"
-                    onchange="editItem(${index}, 'buy', this.value)"
-                >
+            <input
+                type="number"
+                value="${item.buy}"
+                readonly
+            >
 
-                <input
-                    type="number"
-                    value="${item.sell}"
-                    onchange="editItem(${index}, 'sell', this.value)"
-                >
+            <input
+                type="number"
+                value="${item.sell}"
+                readonly
+            >
 
-                <button
-                    class="delete-button"
-                    onclick="deleteItem(${index})"
-                >
-                    Delete
-                </button>
+            <button
+                class="delete-button"
+                onclick="alert('Online editing will be added in the next step.')"
+            >
+                Edit
+            </button>
 
-            `;
+        `;
 
 
-            list.appendChild(row);
+        list.appendChild(row);
 
-        }
-    );
+    });
 
 }
 
 
-
-function editItem(
-    index,
-    property,
-    value
-) {
-
-    if (
-        property === "name"
-    ) {
-
-        items[index].name =
-            value;
-
-    } else {
-
-        items[index][property] =
-            Number(value);
-
-    }
-
-
-    saveDatabase();
-
-    renderItems();
-
-}
-
-
-
-function deleteItem(index) {
-
-    if (
-        !confirm(
-            "Delete this item?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    items.splice(
-        index,
-        1
-    );
-
-
-    saveDatabase();
-
-    renderItems();
-
-    renderAdmin();
-
-}
-
-
-
-/* =========================================
-   RESET DATABASE
-========================================= */
-
-
-function resetDatabase() {
-
-    if (
-        !confirm(
-            "Reset the entire database?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    items =
-        JSON.parse(
-            JSON.stringify(
-                defaultItems
-            )
-        );
-
-
-    saveDatabase();
-
-    renderItems();
-
-    renderAdmin();
-
-}
-
-
-
-/* =========================================
-   ITEM MODAL
-========================================= */
-
+/* ITEM MODAL */
 
 const modal =
     document.getElementById(
         "itemModal"
-    );
-
-
-const modalName =
-    document.getElementById(
-        "modalName"
-    );
-
-
-const modalStats =
-    document.getElementById(
-        "modalStats"
     );
 
 
@@ -726,12 +431,18 @@ function showItem(index) {
     const item =
         items[index];
 
+    if (!item || !modal) return;
 
-    modalName.textContent =
+
+    document.getElementById(
+        "modalName"
+    ).textContent =
         item.name;
 
 
-    modalStats.innerHTML = `
+    document.getElementById(
+        "modalStats"
+    ).innerHTML = `
 
         <div class="modal-stat">
 
@@ -745,7 +456,6 @@ function showItem(index) {
 
         </div>
 
-
         <div class="modal-stat">
 
             <span>
@@ -758,7 +468,6 @@ function showItem(index) {
 
         </div>
 
-
         <div class="modal-stat">
 
             <span>
@@ -770,7 +479,6 @@ function showItem(index) {
             </strong>
 
         </div>
-
 
         <div class="modal-stat">
 
@@ -787,19 +495,16 @@ function showItem(index) {
     `;
 
 
-    modal.classList.add(
-        "show"
-    );
+    modal.classList.add("show");
 
 }
 
 
+/* CLOSE MODAL */
 
 document
-    .getElementById(
-        "closeModal"
-    )
-    .addEventListener(
+    .getElementById("closeModal")
+    ?.addEventListener(
         "click",
         () => {
 
@@ -812,10 +517,8 @@ document
 
 
 document
-    .querySelector(
-        ".modal-background"
-    )
-    .addEventListener(
+    .querySelector(".modal-background")
+    ?.addEventListener(
         "click",
         () => {
 
@@ -827,30 +530,6 @@ document
     );
 
 
-document.addEventListener(
-    "keydown",
-    event => {
+/* START */
 
-        if (
-            event.key === "Escape"
-        ) {
-
-            modal.classList.remove(
-                "show"
-            );
-
-        }
-
-    }
-);
-
-
-
-/* =========================================
-   START WEBSITE
-========================================= */
-
-
-renderItems();
-
-renderAdmin();
+loadDatabase();
