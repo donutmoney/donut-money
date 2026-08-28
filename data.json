@@ -1,0 +1,54 @@
+{
+  "items": [
+    {
+      "name": "Diamond Block",
+      "buy": 12000,
+      "sell": 18000
+    },
+    {
+      "name": "Emerald Block",
+      "buy": 15000,
+      "sell": 22000
+    },
+    {
+      "name": "Gold Block",
+      "buy": 8000,
+      "sell": 12000
+    },
+    {
+      "name": "Iron Block",
+      "buy": 4000,
+      "sell": 6500
+    },
+    {
+      "name": "Obsidian",
+      "buy": 2500,
+      "sell": 4200
+    },
+    {
+      "name": "Kelp",
+      "buy": 20,
+      "sell": 35
+    },
+    {
+      "name": "Bamboo",
+      "buy": 25,
+      "sell": 42
+    },
+    {
+      "name": "Netherite Scrap",
+      "buy": 85000,
+      "sell": 115000
+    },
+    {
+      "name": "Ancient Debris",
+      "buy": 65000,
+      "sell": 90000
+    },
+    {
+      "name": "Ender Pearl",
+      "buy": 1500,
+      "sell": 2500
+    }
+  ]
+}
